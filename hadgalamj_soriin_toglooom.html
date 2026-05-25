@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Хадгаламжийн мэдлэг сорих тоглоом</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 2rem;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            font-size: 14px;
+            color: #718096;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 1.25rem;
+            border-radius: 12px;
+            text-align: center;
+            color: white;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            opacity: 0.9;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .quiz-container {
+            background: #f7fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .question-number {
+            font-size: 12px;
+            color: #718096;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .question-text {
+            font-size: 20px;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 1.5rem;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #e2e8f0;
+            border-radius: 3px;
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-btn {
+            background: white;
+            border: 2px solid #e2e8f0;
+            padding: 1.25rem;
+            border-radius: 12px;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 15px;
+            color: #2d3748;
+            font-weight: 500;
+        }
+
+        .option-btn:hover:not(.disabled) {
+            background: #f0f4ff;
+            border-color: #667eea;
+            transform: translateX(5px);
+        }
+
+        .option-btn.selected {
+            background: #667eea;
+            border-color: #667eea;
+            color: white;
+        }
+
+        .option-btn.correct {
+            background: #48bb78;
+            border-color: #38a169;
+            color: white;
+        }
+
+        .option-btn.incorrect {
+            background: #f56565;
+            border-color: #e53e3e;
+            color: white;
+        }
+
+        .option-btn.disabled {
+            cursor: not-allowed;
+        }
+
+        .feedback {
+            margin-top: 1.5rem;
+            padding: 1.25rem;
+            border-radius: 12px;
+            font-size: 14px;
+            line-height: 1.6;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .feedback-correct {
+            background: #c6f6d5;
+            color: #22543d;
+            border-left: 4px solid #48bb78;
+        }
+
+        .feedback-incorrect {
+            background: #fed7d7;
+            color: #742a2a;
+            border-left: 4px solid #f56565;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 2rem;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 0.875rem 1.75rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            background: white;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            color: #2d3748;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            background: #f7fafc;
+            border-color: #cbd5e0;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #667eea;
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .results {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            padding: 3rem;
+            text-align: center;
+            color: white;
+        }
+
+        .results h2 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+
+        .results-score {
+            font-size: 64px;
+            font-weight: 700;
+            margin: 1rem 0;
+        }
+
+        .results-text {
+            font-size: 16px;
+            margin-bottom: 2rem;
+            opacity: 0.95;
+        }
+
+        .results-message {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .result-excellent {
+            background: rgba(72, 187, 120, 0.2);
+        }
+
+        .result-good {
+            background: rgba(237, 137, 54, 0.2);
+        }
+
+        .result-okay {
+            background: rgba(237, 100, 166, 0.2);
+        }
+
+        .result-poor {
+            background: rgba(245, 101, 101, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💰 Хадгаламжийн мэдлэг сорих тоглоом</h1>
+            <p>Хадгаламж, инвестмент, санхүүгийн төлөвлөлтийн талаар шалгах</p>
+        </div>
+
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-label">Одоогийн асуулт</div>
+                <div class="stat-value" id="current-q">1</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Нийт асуулт</div>
+                <div class="stat-value" id="total-q">10</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Зөв хариулт</div>
+                <div class="stat-value" id="correct-score">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Оноо</div>
+                <div class="stat-value" id="percentage">0%</div>
+            </div>
+        </div>
+
+        <div id="quiz-section">
+            <div class="quiz-container">
+                <div class="question-number" id="q-number">Асуулт 1/10</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill" style="width: 10%;"></div>
+                </div>
+                <div class="question-text" id="question">Асуулт...</div>
+                <div class="options" id="options"></div>
+                <div id="feedback"></div>
+                <div class="button-group">
+                    <button class="btn btn-primary" id="next-btn" onclick="nextQuestion()" style="display: none;">Дараачийн асуулт →</button>
+                    <button class="btn" id="restart-btn" onclick="restartQuiz()" style="display: none;">Дахин эхлүүлэх</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="results-section" class="results hidden">
+            <h2>🎉 Та сорилгыг дууссан!</h2>
+            <div class="results-score" id="final-score">0/10</div>
+            <div class="results-message" id="result-class">Сайн байна!</div>
+            <div class="results-text" id="result-message">Сайн байна!</div>
+            <button class="btn btn-primary" onclick="restartQuiz()" style="color: white; background: rgba(255, 255, 255, 0.3); border-color: white; margin-top: 1rem;">Дахин эхлүүлэх</button>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "Хадгаламж гэж юу вэ?",
+                options: [
+                    "Урт хугацааны төлөвлөлтөөр хийх мөнгөн хуримтлал",
+                    "Товч хугацаанд ашиглах мөнгө",
+                    "Ривалуудаар худалдаа хийх үйл явц",
+                    "Зээлээр авч ашиглах мөнгө"
+                ],
+                correct: 0,
+                explanation: "Хадгаламж нь урт хугацааны санхүүгийн төлөвлөлтөөр хийх мөнгөн хуримтлал юм. Энэ нь ирээдүйнийхээ төлөө төлөвлөх чухал хэрэгцээ."
+            },
+            {
+                question: "Эмпирик дүрмийн дагуу сарын орлогын хэдэн хувийг хадгалах ёстой вэ?",
+                options: [
+                    "5-10%",
+                    "10-20%",
+                    "20-30%",
+                    "30-40%"
+                ],
+                correct: 1,
+                explanation: "Ихэнх санхүүгийн зөвлөхүүд сарын орлогын 10-20% -ыг хадгалахыг зөвлөмжилдэг. Энэ нь балансад сайн санхүүгийн төлөвлөлтийн үндэс."
+            },
+            {
+                question: "Ямар төлөвлөлтийн арга нь 50/30/20 дүрмээр мэддэгдсэн вэ?",
+                options: [
+                    "Хэрэгцээ/Сонирхол/Хадгаламж",
+                    "Сонирхол/Хэрэгцээ/Гадаад",
+                    "Элэгдэл/Аяллал/Мэдлэг",
+                    "Сургалт/Эмнэлэг/Үйлчилгээ"
+                ],
+                correct: 0,
+                explanation: "50/30/20 дүрэм нь: 50% хэрэгцээ (хүнсүүлэлт, түлш), 30% сонирхол (сугалаа, уулзал), 20% хадгаламж гэсэн үг."
+            },
+            {
+                question: "Инвестмент гэж юу вэ?",
+                options: [
+                    "Мөнгөн хуримтлалыг төлөвлөлтгүй ашиглах",
+                    "Ирээдүйн өгөөж авах зорилгоор хөрөнгө сөөрдөх",
+                    "Уз урамшил авах шинэ бүтээгдэхүүн худалдах",
+                    "Эргүүлэх маржинаар борлуулах"
+                ],
+                correct: 1,
+                explanation: "Инвестмент нь ирээдүйн өгөөж авах зорилгоор хөрөнгө (мөнгө, цөм гэх мэт) сөөрдөх үйл явц."
+            },
+            {
+                question: "Түүхийг судлан үзэхэд их хүмүүсийн хадгаламжийн гол бэрхшээл юу байсан вэ?",
+                options: [
+                    "Орлого өндөр байсан",
+                    "Зардал нэмэгдсэн",
+                    "Сахилга байгаагүй",
+                    "Банк хаагдсан"
+                ],
+                correct: 2,
+                explanation: "Хадгаламжийн үр дүн нь сахилга нь хамгийн чухал хүчин зүйл юм. Жорлогдох түвшинг доошлуулах шахдалаас хүлээлцэх нь сайн юм."
+            },
+            {
+                question: "Хэрэгцээлэх хөндлөн санх (Emergency Fund) юу вэ?",
+                options: [
+                    "Долуу хоног завсартай хүүхэлжүүлэх",
+                    "Сургалт авахтай холбоотой нэмэлт мөнгө",
+                    "Санаанд зэргүүлэхгүй үйл явдлын төлөө байлуулж байгаа мөнгө",
+                    "Жүүлэн худалдаж авахад зориулах төлөвлөлт"
+                ],
+                correct: 2,
+                explanation: "Хэрэгцээлэх хөндлөн сан нь санаанд зэргүүлэхгүй үйл явдлаар (эмнэлгийн шаардлага, ажлын алдагдал гэх мэт) хамгаалах цалинтай мөнгө."
+            },
+            {
+                question: "Нэг жилийн хэрэгцээлэх хөндлөн санг хэдэн сарын цалингийн хэмжээ байх ёстой вэ?",
+                options: [
+                    "1-2 сарын цалинтай",
+                    "3-6 сарын цалинтай",
+                    "6-12 сарын цалинтай",
+                    "12-24 сарын цалинтай"
+                ],
+                correct: 1,
+                explanation: "Эмпирик дүрмийн дагуу 3-6 сарын цалингийн хэмжээ хэрэгцээлэх хөндлөн санд байх нь сайн санхүүгийн төлөвлөлтийн үзүүлэлт."
+            },
+            {
+                question: "Хадгаламжийн эргүүлэлтийн эргүүлэлт (Compound Interest) гэж юу вэ?",
+                options: [
+                    "Дээрээс дээр авах өгөөж",
+                    "Борлуулалтын эргэлт",
+                    "Хүүг мөнгөн дээр хүүлэх процесс",
+                    "Эргүүлэх маржин"
+                ],
+                correct: 2,
+                explanation: "Эргүүлэлтийн хүү гэдэг нь хүүгийн өгөөжийг эхний сан дээр дахин нэмж, үүн дээр дахин хүү авах процесс юм. Энэ нь урт хугацааны хадгаламжийн түлхүүр."
+            },
+            {
+                question: "Санхүүгийн төлөвлөлтийн хамгийн чухал алхам юу вэ?",
+                options: [
+                    "Их хэмжээний инвестмент хийх",
+                    "Бүхэл бүтэн орлого, зардлаа ойлгох",
+                    "Зээл авах",
+                    "Шинэ бүтээгдэхүүнтэй үйлвэрлэгч болох"
+                ],
+                correct: 1,
+                explanation: "Санхүүгийн төлөвлөлтийг эхлүүлэхийн өмнө бүхэл бүтэн орлого, зардлаа мөн төлөвлөлтийг ойлгох хэрэгтэй."
+            },
+            {
+                question: "Хадгаламжийн цөмүүд юу вэ?",
+                options: [
+                    "Их дүн өгөлт",
+                    "Байнгын сахилгаар жижиг хэмжээ хадгалах",
+                    "Банктайгаа чухалчиллан сургалт авах",
+                    "Хөл дээрээ байлуулах бус төлөвлөлт"
+                ],
+                correct: 1,
+                explanation: "Хадгаламжийн цөм нь байнгын сахилгаар жижиг хэмжээний мөнгөнөөс эхлүүлэх хадгаламжийн үйлийн төв юм."
+            }
+        ];
+
+        let currentQuestion = 0;
+        let correctAnswers = 0;
+        let answered = false;
+        let selectedAnswer = null;
+
+        function loadQuestion() {
+            const q = questions[currentQuestion];
+            document.getElementById('question').textContent = q.question;
+            document.getElementById('q-number').textContent = `Асуулт ${currentQuestion + 1}/${questions.length}`;
+            document.getElementById('current-q').textContent = currentQuestion + 1;
+            
+            const progressPercent = ((currentQuestion + 1) / questions.length) * 100;
+            document.getElementById('progress-fill').style.width = progressPercent + '%';
+            
+            const optionsDiv = document.getElementById('options');
+            optionsDiv.innerHTML = '';
+            
+            q.options.forEach((option, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.textContent = option;
+                btn.onclick = () => selectAnswer(index);
+                optionsDiv.appendChild(btn);
+            });
+            
+            document.getElementById('feedback').innerHTML = '';
+            document.getElementById('next-btn').style.display = 'none';
+            answered = false;
+            selectedAnswer = null;
+        }
+
+        function selectAnswer(index) {
+            if (answered) return;
+            
+            const q = questions[currentQuestion];
+            answered = true;
+            selectedAnswer = index;
+            
+            const buttons = document.querySelectorAll('.option-btn');
+            const feedbackDiv = document.getElementById('feedback');
+            
+            buttons.forEach((btn, idx) => {
+                btn.classList.add('disabled');
+            });
+            
+            if (index === q.correct) {
+                correctAnswers++;
+                buttons[index].classList.add('correct');
+                feedbackDiv.className = 'feedback feedback-correct';
+                feedbackDiv.innerHTML = '<strong>✓ Зөв хариулт!</strong><br>' + q.explanation;
+            } else {
+                buttons[index].classList.add('incorrect');
+                buttons[q.correct].classList.add('correct');
+                feedbackDiv.className = 'feedback feedback-incorrect';
+                feedbackDiv.innerHTML = '<strong>✗ Буруу хариулт</strong><br>' + q.explanation;
+            }
+            
+            updateStats();
+            document.getElementById('next-btn').style.display = 'inline-block';
+        }
+
+        function updateStats() {
+            document.getElementById('correct-score').textContent = correctAnswers;
+            const percentage = Math.round((correctAnswers / questions.length) * 100);
+            document.getElementById('percentage').textContent = percentage + '%';
+        }
+
+        function nextQuestion() {
+            currentQuestion++;
+            if (currentQuestion < questions.length) {
+                loadQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            document.getElementById('quiz-section').classList.add('hidden');
+            document.getElementById('results-section').classList.remove('hidden');
+            
+            const percentage = Math.round((correctAnswers / questions.length) * 100);
+            document.getElementById('final-score').textContent = correctAnswers + '/' + questions.length;
+            
+            let message = '';
+            let className = '';
+            
+            if (percentage >= 80) {
+                message = '🎉 Агуу! Та хадгаламжийн мэдлэгтэй юм!';
+                className = 'result-excellent';
+            } else if (percentage >= 60) {
+                message = '👍 Сайн байна! Илүү суралцаа хийвэл дээр!';
+                className = 'result-good';
+            } else if (percentage >= 40) {
+                message = '📚 Хадгаламжийн талаар илүүд үзнэ үү!';
+                className = 'result-okay';
+            } else {
+                message = '💪 Дахин оролдоно уу!';
+                className = 'result-poor';
+            }
+            
+            const resultMessage = document.getElementById('result-class');
+            resultMessage.textContent = message;
+            resultMessage.className = 'results-message ' + className;
+            document.getElementById('result-message').textContent = `Та ${correctAnswers} асуултын зөв хариултыг олсон байна.`;
+        }
+
+        function restartQuiz() {
+            currentQuestion = 0;
+            correctAnswers = 0;
+            answered = false;
+            selectedAnswer = null;
+            document.getElementById('quiz-section').classList.remove('hidden');
+            document.getElementById('results-section').classList.add('hidden');
+            updateStats();
+            loadQuestion();
+        }
+
+        loadQuestion();
+        updateStats();
+    </script>
+</body>
+</html>
